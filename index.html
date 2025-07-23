@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>To-Do List</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+  <style>
+    .task-item {
+      transition: all 0.3s ease;
+    }
+    .task-item:hover {
+      transform: translateY(-2px);
+    }
+    .checkbox:checked + .task-text {
+      text-decoration: line-through;
+      color: #9ca3af;
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-purple-50 min-h-screen">
+  <div class="container mx-auto px-4 py-12 max-w-md">
+    <div class="bg-white rounded-2xl shadow-xl overflow-hidden transition-all duration-300 hover:shadow-2xl">
+      <!-- Header -->
+      <div class="bg-gradient-to-r from-blue-500 to-purple-600 p-6 text-white">
+        <div class="flex items-center justify-between">
+          <h1 class="text-2xl font-bold flex items-center">
+            <i class="fas fa-tasks mr-3"></i> My To-Do List
+          </h1>
+          <span id="task-count" class="bg-white/20 px-3 py-1 rounded-full text-sm">0 tasks</span>
+        </div>
+        <p class="text-blue-100 mt-2">What's on your mind today?</p>
+      </div>
+      
+      <!-- Input Section -->
+      <div class="p-6">
+        <div class="flex gap-2 mb-6">
+          <input 
+            type="text" 
+            id="task-input" 
+            placeholder="Add a new task..." 
+            class="flex-1 px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+          >
+          <button id="add-btn" class="px-5 py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg hover:from-blue-600 hover:to-purple-600 transition-all duration-300 transform hover:-translate-y-0.5 flex items-center">
+            <i class="fas fa-plus mr-2"></i> Add
+          </button>
+        </div>
+        
+        <!-- Task List -->
+        <ul id="task-list" class="space-y-3">
+          <!-- Tasks will be added here dynamically -->
+          <li class="text-center text-gray-500 py-4">No tasks yet. Add one above!</li>
+        </ul>
+      </div>
+      
+      <!-- Footer -->
+      <div class="bg-gray-50 px-6 py-4 text-center text-sm text-gray-500 border-t">
+        <p>Click on a task to mark as complete</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const taskInput = document.getElementById('task-input');
+      const addBtn = document.getElementById('add-btn');
+      const taskList = document.getElementById('task-list');
+      const taskCount = document.getElementById('task-count');
+      
+      // Add new task
+      addBtn.addEventListener('click', function() {
+        if (taskInput.value.trim() !== '') {
+          addTask(taskInput.value.trim());
+          taskInput.value = '';
+          updateTaskCount();
+        }
+      });
+      
+      // Add task on Enter key
+      taskInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          addBtn.click();
+        }
+      });
+      
+      function addTask(taskText) {
+        // Remove placeholder if it exists
+        if (taskList.children.length === 1 && taskList.children[0].textContent.includes('No tasks')) {
+          taskList.innerHTML = '';
+        }
+        
+        const taskItem = document.createElement('li');
+        taskItem.className = 'task-item bg-white p-4 rounded-lg border border-gray-200 flex items-center hover:shadow-md cursor-pointer';
+        
+        taskItem.innerHTML = `
+          <div class="flex items-center flex-1">
+            <input type="checkbox" class="checkbox h-5 w-5 text-blue-500 rounded focus:ring-blue-400 mr-3 cursor-pointer">
+            <span class="task-text flex-1 text-gray-800">${taskText}</span>
+          </div>
+          <button class="delete-btn ml-2 text-gray-400 hover:text-red-500 transition-colors">
+            <i class="fas fa-trash"></i>
+          </button>
+        `;
+        
+        // Add event for checkbox
+        const checkbox = taskItem.querySelector('.checkbox');
+        checkbox.addEventListener('change', function() {
+          taskItem.querySelector('.task-text').classList.toggle('line-through');
+          taskItem.classList.toggle('bg-gray-50');
+        });
+        
+        // Add event for delete button
+        const deleteBtn = taskItem.querySelector('.delete-btn');
+        deleteBtn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          taskItem.classList.add('opacity-0', 'translate-x-10');
+          setTimeout(() => {
+            taskItem.remove();
+            updateTaskCount();
+            if (taskList.children.length === 0) {
+              taskList.innerHTML = '<li class="text-center text-gray-500 py-4">No tasks yet. Add one above!</li>';
+            }
+          }, 300);
+        });
+        
+        // Add click event for the whole item (toggle checkbox)
+        taskItem.addEventListener('click', function(e) {
+          if (e.target !== deleteBtn && !deleteBtn.contains(e.target)) {
+            checkbox.checked = !checkbox.checked;
+            checkbox.dispatchEvent(new Event('change'));
+          }
+        });
+        
+        taskList.appendChild(taskItem);
+        
+        // Animation for new item
+        taskItem.classList.add('opacity-0', 'translate-y-5');
+        setTimeout(() => {
+          taskItem.classList.remove('opacity-0', 'translate-y-5');
+        }, 10);
+      }
+      
+      function updateTaskCount() {
+        const count = document.querySelectorAll('#task-list li:not(.text-center)').length;
+        taskCount.textContent = `${count} ${count === 1 ? 'task' : 'tasks'}`;
+      }
+    });
+  </script>
+</body>
+</html>
