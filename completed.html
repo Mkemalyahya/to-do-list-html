@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Productivify - Tugas Selesai</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: '#f0f9ff',
+              100: '#e0f2fe',
+              200: '#bae6fd',
+              300: '#7dd3fc',
+              400: '#38bdf8',
+              500: '#0ea5e9',
+              600: '#0284c7',
+              700: '#0369a1',
+              800: '#075985',
+              900: '#0c4a6e',
+            },
+            secondary: {
+              50: '#f5f3ff',
+              100: '#ede9fe',
+              200: '#ddd6fe',
+              300: '#c4b5fd',
+              400: '#a78bfa',
+              500: '#8b5cf6',
+              600: '#7c3aed',
+              700: '#6d28d9',
+              800: '#5b21b6',
+              900: '#4c1d95',
+            }
+          },
+          animation: {
+            'fade-in': 'fadeIn 0.3s ease-in-out',
+            'slide-in': 'slideIn 0.3s ease-out',
+          },
+          keyframes: {
+            fadeIn: {
+              '0%': { opacity: '0', transform: 'translateY(-10px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' }
+            },
+            slideIn: {
+              '0%': { opacity: '0', transform: 'translateX(-20px)' },
+              '100%': { opacity: '1', transform: 'translateX(0)' }
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .blob {
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      filter: blur(60px);
+      opacity: 0.2;
+      z-index: -1;
+    }
+    
+    .blob-1 {
+      background: #38bdf8;
+      top: 20%;
+      left: 10%;
+      animation: float 8s ease-in-out infinite;
+    }
+    
+    .blob-2 {
+      background: #8b5cf6;
+      bottom: 20%;
+      right: 10%;
+      animation: float 10s ease-in-out infinite reverse;
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+  <!-- Background blobs -->
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  
+  <div class="container mx-auto px-4 py-8 max-w-4xl">
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-8 animate-fade-in">
+      <div>
+        <h1 class="text-3xl font-bold bg-gradient-to-r from-green-600 to-green-800 bg-clip-text text-transparent mb-1">
+          <i class="fas fa-check-circle mr-2"></i> Tugas Selesai
+        </h1>
+        <p class="text-gray-600">Daftar tugas yang sudah kamu selesaikan</p>
+      </div>
+      <a 
+        href="index.html" 
+        class="p-2 text-gray-500 hover:text-primary-600 transition-colors"
+        title="Kembali ke beranda"
+      >
+        <i class="fas fa-home text-xl"></i>
+      </a>
+    </div>
+
+    <!-- Completed Tasks List -->
+    <div class="glass-card rounded-2xl shadow-md border border-white/50 p-6">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-lg font-semibold text-gray-700">
+          <i class="fas fa-list-check mr-2 text-green-500"></i>
+          <span id="completedCount">0</span> Tugas Selesai
+        </h2>
+        <button 
+          onclick="clearCompleted()" 
+          class="px-3 py-1 text-xs bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition-colors font-medium flex items-center"
+        >
+          <i class="fas fa-trash mr-1"></i> Hapus Semua
+        </button>
+      </div>
+
+      <ul id="completedList" class="space-y-3"></ul>
+
+      <!-- Empty State -->
+      <div id="emptyState" class="text-center py-12">
+        <div class="text-6xl mb-4 text-green-200">
+          <i class="fas fa-check-circle"></i>
+        </div>
+        <h3 class="text-xl font-semibold text-gray-700 mb-2">Belum ada tugas selesai</h3>
+        <p class="text-gray-500">Selesaikan beberapa tugas untuk melihatnya di sini!</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // DOM Elements
+    const completedList = document.getElementById("completedList");
+    const completedCount = document.getElementById("completedCount");
+    const emptyState = document.getElementById("emptyState");
+
+    // Load completed tasks from localStorage
+    function loadCompletedTasks() {
+      const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+      const completedTasks = tasks.filter(task => task.completed === 'true');
+      
+      completedCount.textContent = completedTasks.length;
+      
+      if (completedTasks.length === 0) {
+        emptyState.style.display = 'block';
+        return;
+      }
+      
+      emptyState.style.display = 'none';
+      
+      completedTasks.forEach(task => {
+        const li = document.createElement("li");
+        li.className = "bg-white p-4 rounded-xl shadow-sm border border-gray-100 animate-fade-in";
+        
+        const taskContent = document.createElement("div");
+        taskContent.className = "flex justify-between items-start";
+        
+        const textContainer = document.createElement("div");
+        textContainer.className = "flex-1";
+        
+        const taskText = document.createElement("div");
+        taskText.className = "text-gray-800 font-medium line-through opacity-70 mb-1";
+        taskText.textContent = task.text;
+        
+        const taskTime = document.createElement("div");
+        taskTime.className = "text-xs text-gray-500";
+        taskTime.textContent = `Selesai: ${task.completedTime || task.formattedTime}`;
+        
+        const deleteBtn = document.createElement("button");
+        deleteBtn.className = "ml-4 p-2 text-gray-400 hover:text-red-500 transition-colors";
+        deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
+        deleteBtn.onclick = () => {
+          li.classList.add('opacity-0', 'translate-x-full');
+          setTimeout(() => {
+            removeTask(task.id);
+          }, 300);
+        };
+        
+        textContainer.appendChild(taskText);
+        textContainer.appendChild(taskTime);
+        taskContent.appendChild(textContainer);
+        taskContent.appendChild(deleteBtn);
+        li.appendChild(taskContent);
+        completedList.appendChild(li);
+      });
+    }
+    
+    // Remove task from storage
+    function removeTask(id) {
+      const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+      const updatedTasks = tasks.filter(task => task.id !== id);
+      localStorage.setItem('tasks', JSON.stringify(updatedTasks));
+      loadCompletedTasks();
+    }
+    
+    // Clear all completed tasks
+    function clearCompleted() {
+      if (confirm('Apakah Anda yakin ingin menghapus semua tugas selesai?')) {
+        const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+        const updatedTasks = tasks.filter(task => task.completed !== 'true');
+        localStorage.setItem('tasks', JSON.stringify(updatedTasks));
+        loadCompletedTasks();
+      }
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', loadCompletedTasks);
+  </script>
+</body>
+</html>

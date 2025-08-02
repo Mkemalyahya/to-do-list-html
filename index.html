@@ -1,151 +1,790 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>To-Do List</title>
+  <title>Productivify - To-Do List Modern</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: '#f0f9ff',
+              100: '#e0f2fe',
+              200: '#bae6fd',
+              300: '#7dd3fc',
+              400: '#38bdf8',
+              500: '#0ea5e9',
+              600: '#0284c7',
+              700: '#0369a1',
+              800: '#075985',
+              900: '#0c4a6e',
+            },
+            secondary: {
+              50: '#f5f3ff',
+              100: '#ede9fe',
+              200: '#ddd6fe',
+              300: '#c4b5fd',
+              400: '#a78bfa',
+              500: '#8b5cf6',
+              600: '#7c3aed',
+              700: '#6d28d9',
+              800: '#5b21b6',
+              900: '#4c1d95',
+            }
+          },
+          animation: {
+            'fade-in': 'fadeIn 0.3s ease-in-out',
+            'slide-in': 'slideIn 0.3s ease-out',
+            'bounce-subtle': 'bounceSubtle 0.4s ease-out',
+            'float': 'float 6s ease-in-out infinite',
+            'slide-left': 'slideLeft 0.3s ease-out'
+          },
+          keyframes: {
+            fadeIn: {
+              '0%': { opacity: '0', transform: 'translateY(-10px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' }
+            },
+            slideIn: {
+              '0%': { opacity: '0', transform: 'translateX(-20px)' },
+              '100%': { opacity: '1', transform: 'translateX(0)' }
+            },
+            slideLeft: {
+              '0%': { opacity: '0', transform: 'translateX(20px)' },
+              '100%': { opacity: '1', transform: 'translateX(0)' }
+            },
+            bounceSubtle: {
+              '0%, 100%': { transform: 'scale(1)' },
+              '50%': { transform: 'scale(1.02)' }
+            },
+            float: {
+              '0%, 100%': { transform: 'translateY(0)' },
+              '50%': { transform: 'translateY(-10px)' }
+            }
+          }
+        }
+      }
+    }
+  </script>
   <style>
+    .blob {
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      filter: blur(60px);
+      opacity: 0.2;
+      z-index: -1;
+    }
+    
+    .blob-1 {
+      background: #38bdf8;
+      top: 20%;
+      left: 10%;
+      animation: float 8s ease-in-out infinite;
+    }
+    
+    .blob-2 {
+      background: #8b5cf6;
+      bottom: 20%;
+      right: 10%;
+      animation: float 10s ease-in-out infinite reverse;
+    }
+    
     .task-item {
       transition: all 0.3s ease;
     }
+    
     .task-item:hover {
       transform: translateY(-2px);
     }
-    .checkbox:checked + .task-text {
-      text-decoration: line-through;
-      color: #9ca3af;
+    
+    .glass-card {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #0ea5e9 0%, #7c3aed 100%);
+      transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px -5px rgba(14, 165, 233, 0.3);
+    }
+    
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+    
+    .category-chip {
+      transition: all 0.2s ease;
+    }
+    
+    .category-chip:hover {
+      transform: translateY(-1px);
+    }
+    
+    .category-chip.active {
+      background: linear-gradient(135deg, #0ea5e9 0%, #7c3aed 100%);
+      color: white;
+    }
+
+    /* Sidebar mobile behavior */
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+      
+      .sidebar-open .sidebar {
+        transform: translateX(0);
+      }
+      
+      .sidebar-overlay {
+        opacity: 0;
+        pointer-events: none;
+      }
+      
+      .sidebar-open .sidebar-overlay {
+        opacity: 1;
+        pointer-events: all;
+      }
     }
   </style>
 </head>
-<body class="bg-gradient-to-br from-blue-50 to-purple-50 min-h-screen">
-  <div class="container mx-auto px-4 py-12 max-w-md">
-    <div class="bg-white rounded-2xl shadow-xl overflow-hidden transition-all duration-300 hover:shadow-2xl">
-      <!-- Header -->
-      <div class="bg-gradient-to-r from-blue-500 to-purple-600 p-6 text-white">
-        <div class="flex items-center justify-between">
-          <h1 class="text-2xl font-bold flex items-center">
-            <i class="fas fa-tasks mr-3"></i> My To-Do List
-          </h1>
-          <span id="task-count" class="bg-white/20 px-3 py-1 rounded-full text-sm">0 tasks</span>
-        </div>
-        <p class="text-blue-100 mt-2">What's on your mind today?</p>
+<body class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 overflow-x-hidden">
+  
+  <!-- Landing Page -->
+  <div id="landingPage" class="min-h-screen flex flex-col justify-center items-center px-4 py-12 relative">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    
+    <div class="text-center max-w-3xl mx-auto glass-card rounded-3xl p-8 md:p-12 shadow-xl border border-white/50 animate-fade-in">
+      <div class="w-20 h-20 bg-primary-100 rounded-2xl flex items-center justify-center mb-6 mx-auto">
+        <i class="fas fa-tasks text-3xl text-primary-600"></i>
+      </div>
+      <h1 class="text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent mb-4">
+        Productivify
+      </h1>
+      <p class="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
+        Aplikasi to-do list modern yang membantu Anda mengatur tugas harian dengan lebih efisien dan produktif.
+      </p>
+      
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <button 
+          onclick="showTodoApp()" 
+          class="btn-primary text-white font-medium px-8 py-3 rounded-xl shadow-lg"
+        >
+          Mulai Sekarang <i class="fas fa-arrow-right ml-2"></i>
+        </button>
+        <button 
+          class="px-8 py-3 border-2 border-gray-200 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-all"
+        >
+          <i class="fas fa-info-circle mr-2"></i> Pelajari Lebih Lanjut
+        </button>
       </div>
       
-      <!-- Input Section -->
-      <div class="p-6">
-        <div class="flex gap-2 mb-6">
-          <input 
-            type="text" 
-            id="task-input" 
-            placeholder="Add a new task..." 
-            class="flex-1 px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-          >
-          <button id="add-btn" class="px-5 py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg hover:from-blue-600 hover:to-purple-600 transition-all duration-300 transform hover:-translate-y-0.5 flex items-center">
-            <i class="fas fa-plus mr-2"></i> Add
+      <div class="mt-12 grid grid-cols-2 md:grid-cols-3 gap-4 max-w-lg mx-auto">
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 text-center">
+          <i class="fas fa-bolt text-primary-500 text-2xl mb-2"></i>
+          <p class="text-sm font-medium text-gray-700">Cepat</p>
+        </div>
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 text-center">
+          <i class="fas fa-mobile-alt text-secondary-500 text-2xl mb-2"></i>
+          <p class="text-sm font-medium text-gray-700">Responsif</p>
+        </div>
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 text-center">
+          <i class="fas fa-lock text-primary-500 text-2xl mb-2"></i>
+          <p class="text-sm font-medium text-gray-700">Privasi</p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="mt-16 text-center">
+      <p class="text-gray-500 text-sm">Scroll untuk melihat demo <i class="fas fa-chevron-down ml-1"></i></p>
+    </div>
+  </div>
+  
+  <!-- To-Do App (initially hidden) -->
+  <div id="todoApp" class="hidden min-h-screen lg:flex">
+    <!-- Sidebar Overlay (for mobile) -->
+    <div class="sidebar-overlay fixed inset-0 bg-black/50 z-40 transition-opacity duration-300 lg:hidden"></div>
+    
+    <!-- Sidebar -->
+    <div class="sidebar fixed lg:sticky top-0 left-0 h-screen w-72 bg-white shadow-lg border-r border-gray-100 z-50 lg:z-auto transition-transform duration-300 ease-in-out">
+      <div class="h-full p-4 flex flex-col">
+        <!-- Sidebar Header -->
+        <div class="flex items-center justify-between mb-8">
+          <h2 class="text-xl font-bold text-gray-800 flex items-center">
+            <i class="fas fa-sliders-h mr-2 text-primary-500"></i>
+            <span>Menu</span>
+          </h2>
+          <button class="lg:hidden p-2 text-gray-500 hover:text-primary-600" onclick="toggleSidebar()">
+            <i class="fas fa-times"></i>
           </button>
         </div>
         
-        <!-- Task List -->
-        <ul id="task-list" class="space-y-3">
-          <!-- Tasks will be added here dynamically -->
-          <li class="text-center text-gray-500 py-4">No tasks yet. Add one above!</li>
-        </ul>
+        <!-- Categories -->
+        <div class="mb-6">
+          <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Kategori</h3>
+          <div class="space-y-2">
+            <button onclick="filterTasks('all')" class="category-chip active w-full text-left px-3 py-2 rounded-lg bg-gray-100 text-gray-800 font-medium flex items-center">
+              <i class="fas fa-list-ul mr-2"></i>
+              Semua Tugas
+            </button>
+            <button onclick="filterTasks('today')" class="category-chip w-full text-left px-3 py-2 rounded-lg bg-gray-100 text-gray-800 font-medium flex items-center">
+              <i class="fas fa-calendar-day mr-2"></i>
+              Hari Ini
+            </button>
+            <button onclick="filterTasks('important')" class="category-chip w-full text-left px-3 py-2 rounded-lg bg-gray-100 text-gray-800 font-medium flex items-center">
+              <i class="fas fa-star mr-2"></i>
+              Penting
+            </button>
+            <a href="completed.html" onclick="filterTasks('completed')" class="category-chip w-full text-left px-3 py-2 rounded-lg bg-gray-100 text-gray-800 font-medium flex items-center">
+              <i class="fas fa-check-circle mr-2"></i>
+                Tugas Selesai
+            </a>
+          </div>
+        </div>
+        
+        <!-- Tags -->
+        <div class="mb-6">
+          <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Tag</h3>
+          <div class="flex flex-wrap gap-2">
+            <button onclick="filterByTag('work')" class="category-chip px-3 py-1 rounded-full bg-blue-100 text-blue-800 text-sm font-medium">
+              <i class="fas fa-briefcase mr-1"></i> Kerja
+            </button>
+            <button onclick="filterByTag('personal')" class="category-chip px-3 py-1 rounded-full bg-purple-100 text-purple-800 text-sm font-medium">
+              <i class="fas fa-user mr-1"></i> Pribadi
+            </button>
+            <button onclick="filterByTag('shopping')" class="category-chip px-3 py-1 rounded-full bg-green-100 text-green-800 text-sm font-medium">
+              <i class="fas fa-shopping-cart mr-1"></i> Belanja
+            </button>
+            <button onclick="filterByTag('health')" class="category-chip px-3 py-1 rounded-full bg-red-100 text-red-800 text-sm font-medium">
+              <i class="fas fa-heartbeat mr-1"></i> Kesehatan
+            </button>
+          </div>
+        </div>
+        
+        <!-- Stats -->
+        <div class="mt-auto">
+          <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Statistik</h3>
+          <div class="grid grid-cols-2 gap-3">
+            <div class="bg-blue-50 p-3 rounded-lg">
+              <p class="text-xs text-blue-600 font-medium mb-1">Total Tugas</p>
+              <p class="text-xl font-bold text-blue-800" id="statsTotal">0</p>
+            </div>
+            <div class="bg-green-50 p-3 rounded-lg">
+              <p class="text-xs text-green-600 font-medium mb-1">Selesai</p>
+              <p class="text-xl font-bold text-green-800" id="statsCompleted">0</p>
+            </div>
+          </div>
+        </div>
       </div>
-      
-      <!-- Footer -->
-      <div class="bg-gray-50 px-6 py-4 text-center text-sm text-gray-500 border-t">
-        <p>Click on a task to mark as complete</p>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="main-content flex-1">
+      <div class="container mx-auto px-4 py-8 max-w-4xl">
+        <!-- Header -->
+        <div class="flex justify-between items-center mb-8 animate-fade-in">
+          <div class="flex items-center">
+            <button 
+              onclick="toggleSidebar()" 
+              class="mr-4 p-2 text-gray-500 hover:text-primary-600 transition-colors lg:hidden"
+              title="Toggle Menu"
+            >
+              <i class="fas fa-bars text-xl"></i>
+            </button>
+            <div>
+              <h1 class="text-3xl font-bold bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent mb-1">
+                <i class="fas fa-tasks mr-2"></i> Productivify
+              </h1>
+              <p class="text-gray-600">Kelola tugas harianmu dengan mudah</p>
+            </div>
+          </div>
+          <button 
+            onclick="showLandingPage()" 
+            class="p-2 text-gray-500 hover:text-primary-600 transition-colors"
+            title="Kembali ke beranda"
+          >
+            <i class="fas fa-home text-xl"></i>
+          </button>
+        </div>
+
+        <!-- Input Section -->
+        <div class="glass-card rounded-2xl shadow-md border border-white/50 p-6 mb-6 animate-slide-in">
+          <div class="flex gap-3">
+            <input 
+              type="text" 
+              id="taskInput" 
+              placeholder="Apa yang ingin kamu kerjakan hari ini?" 
+              class="flex-1 px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary-400 focus:outline-none transition-all duration-200 bg-white/50 placeholder-gray-400"
+              onkeypress="if(event.key==='Enter') addTask()"
+            >
+            <button 
+              onclick="addTask()" 
+              class="btn-primary text-white px-6 py-3 rounded-xl font-medium flex items-center"
+            >
+              <i class="fas fa-plus mr-2"></i> Tambah
+            </button>
+          </div>
+          
+          <!-- Task Details (hidden by default) -->
+          <div id="taskDetails" class="mt-4 hidden">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Prioritas</label>
+                <select id="taskPriority" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-primary-500 focus:border-primary-500">
+                  <option value="normal">Normal</option>
+                  <option value="high">Tinggi</option>
+                  <option value="urgent">Penting</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Tag</label>
+                <select id="taskTag" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-primary-500 focus:border-primary-500">
+                  <option value="">Pilih Tag</option>
+                  <option value="work">Kerja</option>
+                  <option value="personal">Pribadi</option>
+                  <option value="shopping">Belanja</option>
+                  <option value="health">Kesehatan</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          
+          <button 
+            id="toggleDetailsBtn" 
+            onclick="toggleTaskDetails()" 
+            class="mt-3 text-sm text-primary-600 hover:text-primary-800 font-medium flex items-center"
+          >
+            <i class="fas fa-plus-circle mr-1"></i> Tambah Detail
+          </button>
+        </div>
+
+        <!-- Task Counter -->
+        <div class="flex justify-between items-center mb-4 px-2">
+          <span class="text-gray-600 font-medium" id="taskCounter">0 tugas</span>
+          <div class="flex gap-2">
+            <button 
+              id="sortDateBtn" 
+              class="px-3 py-1 text-xs bg-primary-100 text-primary-700 rounded-lg hover:bg-primary-200 transition-colors font-medium flex items-center"
+              onclick="sortTasks('date')"
+            >
+              <i class="fas fa-calendar-alt mr-1"></i> Sortir Tanggal
+            </button>
+            <button 
+              id="sortAlphaBtn" 
+              class="px-3 py-1 text-xs bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium flex items-center"
+              onclick="sortTasks('alpha')"
+            >
+              <i class="fas fa-sort-alpha-down mr-1"></i> Sortir A-Z
+            </button>
+          </div>
+        </div>
+
+        <!-- Task List -->
+        <ul id="taskList" class="space-y-3"></ul>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="text-center py-12 animate-fade-in">
+          <div class="text-6xl mb-4 text-primary-200 animate-float">
+            <i class="fas fa-tasks"></i>
+          </div>
+          <h3 class="text-xl font-semibold text-gray-700 mb-2">Belum ada tugas</h3>
+          <p class="text-gray-500">Tambahkan tugas pertamamu untuk memulai!</p>
+        </div>
       </div>
     </div>
   </div>
 
   <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      const taskInput = document.getElementById('task-input');
-      const addBtn = document.getElementById('add-btn');
-      const taskList = document.getElementById('task-list');
-      const taskCount = document.getElementById('task-count');
+    // DOM Elements
+    const landingPage = document.getElementById("landingPage");
+    const todoApp = document.getElementById("todoApp");
+    const taskList = document.getElementById("taskList");
+    const taskInput = document.getElementById("taskInput");
+    const taskCounter = document.getElementById("taskCounter");
+    const emptyState = document.getElementById("emptyState");
+    const sortDateBtn = document.getElementById("sortDateBtn");
+    const sortAlphaBtn = document.getElementById("sortAlphaBtn");
+    const taskDetails = document.getElementById("taskDetails");
+    const toggleDetailsBtn = document.getElementById("toggleDetailsBtn");
+    const taskPriority = document.getElementById("taskPriority");
+    const taskTag = document.getElementById("taskTag");
+    const statsTotal = document.getElementById("statsTotal");
+    const statsCompleted = document.getElementById("statsCompleted");
+    
+    let taskCount = 0;
+    let completedCount = 0;
+    let tasks = [];
+    let currentSort = 'date';
+    let currentFilter = 'all';
+    let showDetails = false;
+
+    // Navigation functions
+    function showTodoApp() {
+      landingPage.style.display = 'none';
+      todoApp.style.display = 'flex';
+      taskInput.focus();
+      window.scrollTo(0, 0);
+    }
+    
+    function showLandingPage() {
+      landingPage.style.display = 'flex';
+      todoApp.style.display = 'none';
+      window.scrollTo(0, 0);
+    }
+    
+    function toggleSidebar() {
+      document.body.classList.toggle('sidebar-open');
+    }
+    
+    function toggleTaskDetails() {
+      showDetails = !showDetails;
+      if (showDetails) {
+        taskDetails.classList.remove('hidden');
+        toggleDetailsBtn.innerHTML = '<i class="fas fa-minus-circle mr-1"></i> Sembunyikan Detail';
+      } else {
+        taskDetails.classList.add('hidden');
+        toggleDetailsBtn.innerHTML = '<i class="fas fa-plus-circle mr-1"></i> Tambah Detail';
+      }
+    }
+
+    // Task functions
+    function updateCounter() {
+      taskCounter.textContent = `${taskCount} ${taskCount === 1 ? 'tugas' : 'tugas'}`;
+      statsTotal.textContent = taskCount;
+      statsCompleted.textContent = completedCount;
+      emptyState.style.display = taskCount === 0 ? 'block' : 'none';
+    }
+
+    function createTaskElement(task) {
+      const li = document.createElement("li");
+      li.className = "task-item glass-card rounded-xl p-4 shadow-sm border border-white/50 hover:shadow-md transition-all duration-200 animate-slide-in";
+      li.dataset.createdAt = task.createdAt;
+      li.dataset.text = task.text.toLowerCase();
+      li.dataset.priority = task.priority || 'normal';
+      li.dataset.tag = task.tag || '';
+      li.dataset.completed = task.completed || 'false';
       
-      // Add new task
-      addBtn.addEventListener('click', function() {
-        if (taskInput.value.trim() !== '') {
-          addTask(taskInput.value.trim());
-          taskInput.value = '';
-          updateTaskCount();
-        }
-      });
+      // Priority badge colors
+      const priorityColors = {
+        'urgent': 'bg-red-100 text-red-800',
+        'high': 'bg-yellow-100 text-yellow-800',
+        'normal': 'bg-gray-100 text-gray-800'
+      };
       
-      // Add task on Enter key
-      taskInput.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-          addBtn.click();
-        }
-      });
-      
-      function addTask(taskText) {
-        // Remove placeholder if it exists
-        if (taskList.children.length === 1 && taskList.children[0].textContent.includes('No tasks')) {
-          taskList.innerHTML = '';
-        }
+      // Tag badge colors
+      const tagColors = {
+        'work': 'bg-blue-100 text-blue-800',
+        'personal': 'bg-purple-100 text-purple-800',
+        'shopping': 'bg-green-100 text-green-800',
+        'health': 'bg-red-100 text-red-800'
+      };
+
+      // Checkbox with custom styling
+      const checkboxContainer = document.createElement("div");
+      checkboxContainer.className = "flex items-start gap-4";
+
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.className = "w-5 h-5 rounded border-2 border-gray-300 text-primary-600 focus:ring-primary-500 focus:ring-2 transition-all duration-200 mt-1 cursor-pointer";
+      checkbox.checked = task.completed === 'true';
+      checkbox.onchange = () => {
+        const isChecked = checkbox.checked;
+        task.completed = isChecked ? 'true' : 'false';
+        li.dataset.completed = task.completed;
         
-        const taskItem = document.createElement('li');
-        taskItem.className = 'task-item bg-white p-4 rounded-lg border border-gray-200 flex items-center hover:shadow-md cursor-pointer';
-        
-        taskItem.innerHTML = `
-          <div class="flex items-center flex-1">
-            <input type="checkbox" class="checkbox h-5 w-5 text-blue-500 rounded focus:ring-blue-400 mr-3 cursor-pointer">
-            <span class="task-text flex-1 text-gray-800">${taskText}</span>
-          </div>
-          <button class="delete-btn ml-2 text-gray-400 hover:text-red-500 transition-colors">
-            <i class="fas fa-trash"></i>
-          </button>
-        `;
-        
-        // Add event for checkbox
-        const checkbox = taskItem.querySelector('.checkbox');
-        checkbox.addEventListener('change', function() {
-          taskItem.querySelector('.task-text').classList.toggle('line-through');
-          taskItem.classList.toggle('bg-gray-50');
-        });
-        
-        // Add event for delete button
-        const deleteBtn = taskItem.querySelector('.delete-btn');
-        deleteBtn.addEventListener('click', function(e) {
-          e.stopPropagation();
-          taskItem.classList.add('opacity-0', 'translate-x-10');
-          setTimeout(() => {
-            taskItem.remove();
-            updateTaskCount();
-            if (taskList.children.length === 0) {
-              taskList.innerHTML = '<li class="text-center text-gray-500 py-4">No tasks yet. Add one above!</li>';
-            }
-          }, 300);
-        });
-        
-        // Add click event for the whole item (toggle checkbox)
-        taskItem.addEventListener('click', function(e) {
-          if (e.target !== deleteBtn && !deleteBtn.contains(e.target)) {
-            checkbox.checked = !checkbox.checked;
-            checkbox.dispatchEvent(new Event('change'));
+        if (isChecked) {
+          completedCount++;
+          // Animation before removing if filtered
+          li.style.transform = 'scale(0.95)';
+          li.style.opacity = '0.7';
+          taskContent.style.textDecoration = "line-through";
+          taskContent.style.opacity = "0.5";
+          
+          // Remove task after short delay if viewing completed tasks
+          if (currentFilter === 'completed') {
+            setTimeout(() => {
+              li.style.transform = 'translateX(100%)';
+              li.style.opacity = '0';
+              setTimeout(() => {
+                if (taskList.contains(li)) {
+                  taskList.removeChild(li);
+                  taskCount--;
+                  tasks = tasks.filter(t => t.id !== task.id);
+                  updateCounter();
+                }
+              }, 300);
+            }, 800);
           }
-        });
-        
-        taskList.appendChild(taskItem);
-        
-        // Animation for new item
-        taskItem.classList.add('opacity-0', 'translate-y-5');
+        } else {
+          completedCount--;
+          taskContent.style.textDecoration = "none";
+          taskContent.style.opacity = "1";
+        }
+        updateCounter();
+      };
+
+      // Content container
+      const contentContainer = document.createElement("div");
+      contentContainer.className = "flex-1";
+
+      // Task text
+      const taskContent = document.createElement("div");
+      taskContent.className = "text-gray-800 font-medium mb-1 leading-relaxed";
+      if (task.completed === 'true') {
+        taskContent.style.textDecoration = "line-through";
+        taskContent.style.opacity = "0.5";
+      }
+      taskContent.textContent = task.text;
+
+      // Meta info
+      const metaContainer = document.createElement("div");
+      metaContainer.className = "flex flex-wrap items-center gap-2 mb-3";
+
+      // Time label
+      const timeLabel = document.createElement("div");
+      timeLabel.className = "text-xs text-gray-500";
+      timeLabel.textContent = `Dibuat: ${task.formattedTime} WIB`;
+
+      // Priority badge
+      if (task.priority) {
+        const priorityBadge = document.createElement("span");
+        priorityBadge.className = `text-xs px-2 py-1 rounded-full ${priorityColors[task.priority]}`;
+        priorityBadge.innerHTML = `<i class="fas fa-${task.priority === 'urgent' ? 'exclamation-triangle' : task.priority === 'high' ? 'arrow-up' : 'ellipsis-h'} mr-1"></i> ${task.priority === 'urgent' ? 'Penting' : task.priority === 'high' ? 'Tinggi' : 'Normal'}`;
+        metaContainer.appendChild(priorityBadge);
+      }
+
+      // Tag badge
+      if (task.tag) {
+        const tagBadge = document.createElement("span");
+        tagBadge.className = `text-xs px-2 py-1 rounded-full ${tagColors[task.tag]}`;
+        tagBadge.innerHTML = `<i class="fas fa-${task.tag === 'work' ? 'briefcase' : task.tag === 'personal' ? 'user' : task.tag === 'shopping' ? 'shopping-cart' : 'heartbeat'} mr-1"></i> ${task.tag === 'work' ? 'Kerja' : task.tag === 'personal' ? 'Pribadi' : task.tag === 'shopping' ? 'Belanja' : 'Kesehatan'}`;
+        metaContainer.appendChild(tagBadge);
+      }
+
+      metaContainer.appendChild(timeLabel);
+
+      // Button container
+      const buttonContainer = document.createElement("div");
+      buttonContainer.className = "flex gap-2";
+
+      // Edit button
+      const editBtn = document.createElement("button");
+      editBtn.className = "px-3 py-1.5 text-xs bg-primary-50 text-primary-700 rounded-lg hover:bg-primary-100 transition-colors duration-200 font-medium flex items-center";
+      editBtn.innerHTML = '<i class="fas fa-edit mr-1"></i> Edit';
+      editBtn.onclick = () => {
+        const edited = prompt("Edit tugas:", taskContent.textContent.trim());
+        if (edited !== null && edited.trim() !== "") {
+          taskContent.textContent = edited.trim();
+          task.text = edited.trim();
+          li.dataset.text = edited.trim().toLowerCase();
+          li.classList.add('animate-bounce-subtle');
+          setTimeout(() => li.classList.remove('animate-bounce-subtle'), 400);
+        }
+      };
+
+      // Delete button
+      const deleteBtn = document.createElement("button");
+      deleteBtn.className = "px-3 py-1.5 text-xs bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition-colors duration-200 font-medium flex items-center";
+      deleteBtn.innerHTML = '<i class="fas fa-trash-alt mr-1"></i> Hapus';
+      deleteBtn.onclick = () => {
+        li.style.transform = 'translateX(-100%)';
+        li.style.opacity = '0';
         setTimeout(() => {
-          taskItem.classList.remove('opacity-0', 'translate-y-5');
-        }, 10);
+          if (taskList.contains(li)) {
+            taskList.removeChild(li);
+            taskCount--;
+            if (task.completed === 'true') completedCount--;
+            tasks = tasks.filter(t => t.id !== task.id);
+            updateCounter();
+          }
+        }, 200);
+      };
+
+      // Assemble the task item
+      contentContainer.appendChild(taskContent);
+      contentContainer.appendChild(metaContainer);
+      buttonContainer.appendChild(editBtn);
+      buttonContainer.appendChild(deleteBtn);
+      contentContainer.appendChild(buttonContainer);
+      
+      checkboxContainer.appendChild(checkbox);
+      checkboxContainer.appendChild(contentContainer);
+      li.appendChild(checkboxContainer);
+
+      return li;
+    }
+
+    function addTask() {
+      const taskText = taskInput.value.trim();
+      if (taskText === "") return;
+
+      const now = new Date();
+      const formattedTime = now.toLocaleString("id-ID", {
+        timeZone: "Asia/Jakarta"
+      });
+
+      const task = {
+        id: Date.now(),
+        text: taskText,
+        createdAt: now.getTime(),
+        formattedTime: formattedTime,
+        priority: showDetails ? taskPriority.value : 'normal',
+        tag: showDetails ? taskTag.value : '',
+        completed: 'false'
+      };
+
+      tasks.push(task);
+      taskCount++;
+      
+      const li = createTaskElement(task);
+      taskList.appendChild(li);
+      taskInput.value = "";
+      updateCounter();
+      
+      // Reset details
+      if (showDetails) {
+        toggleTaskDetails();
+        taskPriority.value = 'normal';
+        taskTag.value = '';
       }
       
-      function updateTaskCount() {
-        const count = document.querySelectorAll('#task-list li:not(.text-center)').length;
-        taskCount.textContent = `${count} ${count === 1 ? 'task' : 'tasks'}`;
+      // Sort the tasks according to current sort method
+      sortTasks(currentSort);
+    }
+
+    function sortTasks(method) {
+      currentSort = method;
+      
+      // Update button states
+      if (method === 'date') {
+        sortDateBtn.classList.add('bg-primary-100', 'text-primary-700');
+        sortDateBtn.classList.remove('bg-gray-100', 'text-gray-700');
+        sortAlphaBtn.classList.add('bg-gray-100', 'text-gray-700');
+        sortAlphaBtn.classList.remove('bg-primary-100', 'text-primary-700');
+      } else {
+        sortAlphaBtn.classList.add('bg-primary-100', 'text-primary-700');
+        sortAlphaBtn.classList.remove('bg-gray-100', 'text-gray-700');
+        sortDateBtn.classList.add('bg-gray-100', 'text-gray-700');
+        sortDateBtn.classList.remove('bg-primary-100', 'text-primary-700');
       }
+      
+      // Clear the task list
+      taskList.innerHTML = '';
+      
+      // Sort tasks array   
+      if (method === 'date') {
+        tasks.sort((a, b) => b.createdAt - a.createdAt);
+      } else {
+        tasks.sort((a, b) => a.text.localeCompare(b.text));
+      }
+      
+      // Re-add sorted and filtered tasks
+      filterTasks(currentFilter);
+    }
+    
+    function filterTasks(filter) {
+      currentFilter = filter;
+      
+      // Update active category button
+      document.querySelectorAll('.category-chip').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      
+      const activeBtn = document.querySelector(`button[onclick="filterTasks('${filter}')"]`);
+      if (activeBtn) {
+        activeBtn.classList.add('active');
+      }
+      
+      // Clear the task list
+      taskList.innerHTML = '';
+      
+      // Filter tasks
+      let filteredTasks = [...tasks];
+      
+      const now = new Date();
+      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+      
+      switch(filter) {
+        case 'today':
+          filteredTasks = filteredTasks.filter(task => {
+            const taskDate = new Date(task.createdAt);
+            return taskDate >= todayStart;
+          });
+          break;
+        case 'important':
+          filteredTasks = filteredTasks.filter(task => task.priority === 'urgent' || task.priority === 'high');
+          break;
+        case 'completed':
+          filteredTasks = filteredTasks.filter(task => task.completed === 'true');
+          break;
+        // 'all' shows all tasks
+      }
+      
+      // Add filtered tasks
+      filteredTasks.forEach(task => {
+        const li = createTaskElement(task);
+        taskList.appendChild(li);
+      });
+      
+      // Update empty state
+      emptyState.style.display = filteredTasks.length === 0 ? 'block' : 'none';
+    }
+    
+    function filterByTag(tag) {
+      // Clear the task list
+      taskList.innerHTML = '';
+      
+      // Filter tasks by tag
+      const filteredTasks = tasks.filter(task => task.tag === tag);
+      
+      // Add filtered tasks
+      filteredTasks.forEach(task => {
+        const li = createTaskElement(task);
+        taskList.appendChild(li);
+      });
+      
+      // Update empty state
+      emptyState.style.display = filteredTasks.length === 0 ? 'block' : 'none';
+      
+      // Reset category filter
+      currentFilter = 'all';
+      document.querySelectorAll('.category-chip').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      document.querySelector(`button[onclick="filterTasks('all')"]`).classList.add('active');
+    }
+
+    // Initialize
+    updateCounter();
+    sortTasks('date');
+    
+    // Close sidebar when clicking overlay
+    document.querySelector('.sidebar-overlay').addEventListener('click', toggleSidebar);
+
+    // Add some subtle animations on load
+    document.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => {
+        taskInput.focus();
+      }, 300);
     });
+
+    // Di fungsi addTask(), tambahkan:
+localStorage.setItem('tasks', JSON.stringify(tasks));
+
+// Di fungsi yang mengubah status completed, tambahkan:
+task.completedTime = new Date().toLocaleString("id-ID", {timeZone: "Asia/Jakarta"});
+localStorage.setItem('tasks', JSON.stringify(tasks));
   </script>
+
 </body>
 </html>
