@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="id" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskFlow - Aplikasi To-Do List</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .sidebar-item.active {
+            background-color: #e0f2fe;
+            border-left: 4px solid #0284c7;
+            font-weight: 500;
+        }
+        .task-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .fixed-sidebar {
+            position: fixed;
+            height: calc(100vh - 4rem); /* Adjust based on your header height */
+            overflow-y: auto;
+        }
+        .content-with-sidebar {
+            margin-left: 16rem; /* Same as sidebar width */
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-b from-primary-50 to-white font-sans">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center">
+                    <a href="index.html" class="flex-shrink-0 flex items-center">
+                        <svg class="h-8 w-8 text-primary-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                        </svg>
+                        <span class="ml-2 text-xl font-bold text-primary-800">TaskFlow</span>
+                    </a>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-center space-x-4">
+                        <a href="app.html" class="px-3 py-2 text-sm font-medium text-white bg-primary-600 rounded-md">Aplikasi</a>
+                        <a href="dashboard.html" class="px-3 py-2 text-sm font-medium text-primary-700 hover:text-primary-900">Dashboard</a>
+                        <a href="index.html#features" class="px-3 py-2 text-sm font-medium text-primary-700 hover:text-primary-900">Fitur</a>
+                    </div>
+                </div>
+               
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main App Content with Fixed Sidebar -->
+    <div class="flex pt-4">
+        <!-- Fixed Sidebar -->
+        <div class="fixed-sidebar w-64 bg-white shadow-lg hidden md:block">
+            <!-- Main Menu -->
+            <div class="p-4 border-b border-primary-100">
+                      <div class="p-4 border-b border-primary-100">
+                <h2 class="text-lg font-semibold text-primary-800">Menu</h2>
+            </div>
+            
+                <ul class="space-y-1">
+                    <li>
+                        <a href="dashboard.html" class="sidebar-item w-full text-left px-3 py-2 rounded-md text-sm font-medium text-primary-800 hover:bg-primary-50">
+                            <i class="fas fa-chart-line mr-2 text-primary-600"></i>Dashboard
+                        </a>
+                    </li>
+                    <li>
+                        <a href="app.html" class="sidebar-item active w-full text-left px-3 py-2 rounded-md text-sm font-medium text-primary-800 hover:bg-primary-50">
+                            <i class="fas fa-tasks mr-2 text-primary-600"></i>Aplikasi To-Do
+                        </a>
+                    </li>
+                    <li>
+                        <a href="app.html" class="sidebar-item w-full text-left px-3 py-2 rounded-md text-sm font-medium text-primary-800 hover:bg-primary-50">
+                            <i class="fas fa-list mr-2 text-primary-600"></i>Semua Tugas
+                        </a>
+                    </li>
+                    <li>
+                        <a href="app.html#filter=today" class="sidebar-item w-full text-left px-3 py-2 rounded-md text-sm font-medium text-primary-800 hover:bg-primary-50">
+                            <i class="fas fa-calendar-day mr-2 text-primary-600"></i>Hari Ini
+                        </a>
+                    </li>
+                    <li>
+                        <a href="app.html#filter=completed" class="sidebar-item w-full text-left px-3 py-2 rounded-md text-sm font-medium text-primary-800 hover:bg-primary-50">
+                            <i class="fas fa-check-circle mr-2 text-primary-600"></i>Selesai
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            
+            <!-- Quick Stats -->
+            <div class="p-4">
+                <h3 class="text-sm font-medium text-primary-700 uppercase tracking-wider mb-2">Statistik Cepat</h3>
+                <div class="space-y-2">
+                    <div class="flex justify-between text-sm text-primary-600">
+                        <span>Total Tugas:</span>
+                        <span id="sidebar-total-tasks" class="font-medium">0</span>
+                    </div>
+                    <div class="flex justify-between text-sm text-primary-600">
+                        <span>Selesai:</span>
+                        <span id="sidebar-completed-tasks" class="font-medium text-green-600">0</span>
+                    </div>
+                    <div class="flex justify-between text-sm text-primary-600">
+                        <span>Belum Selesai:</span>
+                        <span id="sidebar-pending-tasks" class="font-medium text-yellow-600">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 content-with-sidebar p-6">
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                <!-- App Header -->
+                <div class="bg-primary-700 p-6 text-white">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h1 class="text-2xl font-bold">To-Do List</h1>
+                            <p class="text-primary-200">Kelola tugas Anda dengan mudah</p>
+                        </div>
+                        <div class="text-primary-200 text-sm">
+                            <span id="current-date"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form -->
+                <form id="todo-form" class="p-6 border-b border-primary-100">
+                    <div class="flex gap-2">
+                        <input 
+                            type="text" 
+                            id="task-input" 
+                            placeholder="Tulis tugas..." 
+                            required
+                            class="flex-1 px-4 py-3 border border-primary-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                            autofocus
+                        >
+                        <button 
+                            type="submit"
+                            class="px-4 py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors duration-200 flex items-center"
+                        >
+                            <i class="fas fa-plus mr-2"></i>Tambah
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Task List -->
+                <div id="todo-list-container">
+                    <ul id="todo-list" class="divide-y divide-primary-100"></ul>
+                    
+                    <!-- Empty State -->
+                    <div id="empty-state" class="p-8 text-center hidden">
+                        <div class="mx-auto w-24 h-24 text-primary-300 mb-4">
+                            <i class="fas fa-clipboard-list text-6xl"></i>
+                        </div>
+                        <h3 class="text-lg font-medium text-primary-800">Tidak ada tugas</h3>
+                        <p class="mt-2 text-primary-500">Tambahkan tugas baru untuk memulai</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const form = document.getElementById('todo-form');
+        const input = document.getElementById('task-input');
+        const list = document.getElementById('todo-list');
+        const emptyState = document.getElementById('empty-state');
+        const currentDateEl = document.getElementById('current-date');
+        const sidebarTotalTasks = document.getElementById('sidebar-total-tasks');
+        const sidebarCompletedTasks = document.getElementById('sidebar-completed-tasks');
+        const sidebarPendingTasks = document.getElementById('sidebar-pending-tasks');
+
+        let todos = JSON.parse(localStorage.getItem('todos')) || [];
+        let currentFilter = 'all';
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            // Format tanggal
+            function formatDate(date) {
+                const options = { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric',
+                    timeZone: 'Asia/Jakarta'
+                };
+                return date.toLocaleDateString('id-ID', options);
+            }
+
+            currentDateEl.textContent = formatDate(new Date());
+            
+            // Check for filter from URL hash
+            const hash = window.location.hash.substring(1);
+            if (hash.startsWith('filter=')) {
+                currentFilter = hash.split('=')[1];
+            }
+            
+            render();
+        });
+
+        function saveTodos() {
+            localStorage.setItem('todos', JSON.stringify(todos));
+            updateSidebarStats();
+        }
+
+        function formatTime(date) {
+            return date.toLocaleString("id-ID", {
+                timeZone: "Asia/Jakarta",
+                hour12: false,
+                hour: '2-digit',
+                minute: '2-digit',
+                day: 'numeric',
+                month: 'short'
+            });
+        }
+
+        function updateSidebarStats() {
+            const total = todos.length;
+            const completed = todos.filter(todo => todo.done).length;
+            const pending = total - completed;
+            
+            sidebarTotalTasks.textContent = total;
+            sidebarCompletedTasks.textContent = completed;
+            sidebarPendingTasks.textContent = pending;
+        }
+
+        function render() {
+            list.innerHTML = '';
+            
+            let filteredTodos = [...todos];
+            
+            // Apply filters
+            if (currentFilter === 'today') {
+                const today = new Date().toDateString();
+                filteredTodos = filteredTodos.filter(todo => {
+                    const todoDate = new Date(todo.createdAt).toDateString();
+                    return todoDate === today;
+                });
+            } else if (currentFilter === 'completed') {
+                filteredTodos = filteredTodos.filter(todo => todo.done);
+            }
+            
+            filteredTodos.forEach((todo, index) => {
+                const li = document.createElement('li');
+                li.className = 'p-4 hover:bg-primary-50 transition-all duration-150 task-card';
+                
+                const container = document.createElement('div');
+                container.className = 'flex items-start gap-3';
+                
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.checked = todo.done;
+                checkbox.className = 'mt-1 h-5 w-5 text-primary-600 rounded focus:ring-primary-500 cursor-pointer';
+                checkbox.onchange = () => {
+                    todos[index].done = checkbox.checked;
+                    saveTodos();
+                    render();
+                };
+
+                const content = document.createElement('div');
+                content.className = 'flex-1';
+                
+                const text = document.createElement('span');
+                text.className = `block ${todo.done ? 'line-through text-primary-400' : 'text-primary-800'}`;
+                text.textContent = todo.text;
+                
+                const meta = document.createElement('div');
+                meta.className = 'flex items-center mt-1 text-xs text-primary-500';
+                
+                const time = document.createElement('span');
+                time.className = 'mr-2';
+                time.innerHTML = `<i class="far fa-clock mr-1"></i>${todo.time}`;
+                
+                meta.appendChild(time);
+
+                content.appendChild(text);
+                content.appendChild(meta);
+
+                const actions = document.createElement('div');
+                actions.className = 'flex gap-2';
+                
+                const editBtn = document.createElement('button');
+                editBtn.className = 'px-3 py-1 text-xs bg-primary-100 hover:bg-primary-200 text-primary-700 rounded transition-colors duration-200';
+                editBtn.innerHTML = '<i class="fas fa-edit mr-1"></i>Edit';
+                editBtn.onclick = () => {
+                    const newText = prompt("Edit tugas:", todo.text);
+                    if (newText !== null && newText.trim()) {
+                        todos[index].text = newText.trim();
+                        todos[index].time = formatTime(new Date());
+                        saveTodos();
+                        render();
+                    }
+                };
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'px-3 py-1 text-xs bg-red-100 hover:bg-red-200 text-red-700 rounded transition-colors duration-200';
+                deleteBtn.innerHTML = '<i class="fas fa-trash-alt mr-1"></i>Hapus';
+                deleteBtn.onclick = () => {
+                    if (confirm('Apakah Anda yakin ingin menghapus tugas ini?')) {
+                        todos.splice(index, 1);
+                        saveTodos();
+                        render();
+                    }
+                };
+
+                actions.appendChild(editBtn);
+                actions.appendChild(deleteBtn);
+
+                container.appendChild(checkbox);
+                container.appendChild(content);
+                container.appendChild(actions);
+
+                li.appendChild(container);
+                list.appendChild(li);
+            });
+            
+            // Toggle empty state
+            if (filteredTodos.length === 0) {
+                emptyState.classList.remove('hidden');
+                list.classList.add('hidden');
+            } else {
+                emptyState.classList.add('hidden');
+                list.classList.remove('hidden');
+            }
+            
+            updateSidebarStats();
+        }
+
+        form.onsubmit = (e) => {
+            e.preventDefault();
+            const taskText = input.value.trim();
+            if (!taskText) return;
+
+            const newTask = {
+                text: taskText,
+                done: false,
+                time: formatTime(new Date()),
+                createdAt: new Date().toISOString()
+            };
+
+            todos.push(newTask);
+            saveTodos();
+            render();
+            input.value = '';
+            input.focus();
+        };
+
+        // Realtime update antar tab
+        window.addEventListener('storage', () => {
+            todos = JSON.parse(localStorage.getItem('todos')) || [];
+            render();
+        });
+    </script>
+</body>
+</html>

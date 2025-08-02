@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="id" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskFlow - Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        },
+                        secondary: {
+                            100: '#f5f5f5',
+                            200: '#eeeeee',
+                            300: '#e0e0e0',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .stat-card {
+            transition: all 0.3s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        .sidebar-item.active {
+            background-color: #e0f2fe;
+            border-left: 4px solid #0284c7;
+            font-weight: 500;
+        }
+        /* Styles for fixed sidebar */
+        .fixed-sidebar-container {
+            position: fixed;
+            left: 0;
+            top: 4rem; /* Height of navbar */
+            bottom: 0;
+            width: 16rem; /* Same as w-64 */
+            overflow-y: auto;
+            z-index: 10;
+        }
+        .content-with-sidebar {
+            margin-left: 16rem; /* Same as sidebar width */
+            padding: 1.5rem; /* Same as p-6 */
+        }
+        @media (max-width: 768px) {
+            .fixed-sidebar-container {
+                position: static;
+                width: 100%;
+            }
+            .content-with-sidebar {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-b from-primary-50 to-white font-sans">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm fixed w-full z-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center">
+                    <a href="index.html" class="flex-shrink-0 flex items-center">
+                        <svg class="h-8 w-8 text-primary-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                        </svg>
+                        <span class="ml-2 text-xl font-bold text-primary-800">TaskFlow</span>
+                    </a>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-center space-x-4">
+                        <a href="dashboard.html" class="px-3 py-2 text-sm font-medium text-white bg-primary-600 rounded-md">Dashboard</a>
+                        <a href="app.html" class="px-3 py-2 text-sm font-medium text-primary-700 hover:text-primary-900">Aplikasi</a>
+                        <a href="index.html#features" class="px-3 py-2 text-sm font-medium text-primary-700 hover:text-primary-900">Fitur</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content with Fixed Sidebar -->
+    <div class="flex pt-16"> <!-- Added pt-16 to account for fixed navbar -->
+        <!-- Fixed Sidebar -->
+        <div class="fixed-sidebar-container bg-white shadow-lg hidden md:block">
+            <div class="p-4 border-b border-primary-100">
+                <h2 class="text-lg font-semibold text-primary-800">Menu</h2>
+            </div>
+            
+            <!-- Main Menu -->
+            <div class="p-4 border-b border-primary-100">
+                <ul class="space-y-1">
+                    <li>
+                        <a href="dashboard.html" class="sidebar-item active w-full text-left px-3 py-2 rounded-md text-sm font-medium text-primary-800 hover:bg-primary-50">
+                            <i class="fas fa-chart-line mr-2 text-primary-600"></i>Dashboard
+                        </a>
+                    </li>
+                    <li>
+                        <a href="app.html" class="sidebar-item w-full text-left px-3 py-2 rounded-md text-sm font-medium text-primary-800 hover:bg-primary-50">
+                            <i class="fas fa-tasks mr-2 text-primary-600"></i>Aplikasi To-Do
+                        </a>
+                    </li>
+                    <li>
+                        <a href="app.html" class="sidebar-item w-full text-left px-3 py-2 rounded-md text-sm font-medium text-primary-800 hover:bg-primary-50">
+                            <i class="fas fa-list mr-2 text-primary-600"></i>Semua Tugas
+                        </a>
+                    </li>
+                    <li>
+                        <a href="app.html#filter=today" class="sidebar-item w-full text-left px-3 py-2 rounded-md text-sm font-medium text-primary-800 hover:bg-primary-50">
+                            <i class="fas fa-calendar-day mr-2 text-primary-600"></i>Hari Ini
+                        </a>
+                    </li>
+                    <li>
+                        <a href="app.html#filter=completed" class="sidebar-item w-full text-left px-3 py-2 rounded-md text-sm font-medium text-primary-800 hover:bg-primary-50">
+                            <i class="fas fa-check-circle mr-2 text-primary-600"></i>Selesai
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            
+            <!-- Quick Stats -->
+            <div class="p-4">
+                <h3 class="text-sm font-medium text-primary-700 uppercase tracking-wider mb-2">Statistik Cepat</h3>
+                <div class="space-y-2">
+                    <div class="flex justify-between text-sm text-primary-600">
+                        <span>Total Tugas:</span>
+                        <span id="sidebar-total-tasks" class="font-medium">0</span>
+                    </div>
+                    <div class="flex justify-between text-sm text-primary-600">
+                        <span>Selesai:</span>
+                        <span id="sidebar-completed-tasks" class="font-medium text-green-600">0</span>
+                    </div>
+                    <div class="flex justify-between text-sm text-primary-600">
+                        <span>Terlambat:</span>
+                        <span id="sidebar-overdue-tasks" class="font-medium text-red-600">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Dashboard Content -->
+        <div class="flex-1 content-with-sidebar">
+            <!-- Header -->
+            <div class="mb-8">
+                <h1 class="text-3xl font-bold text-primary-800">Dashboard TaskFlow</h1>
+                <p class="text-primary-600">Statistik lengkap produktivitas Anda</p>
+                <div class="text-sm text-primary-500 mt-2">
+                    <span id="current-date"></span>
+                </div>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <!-- Total Tasks -->
+                <div class="stat-card bg-white rounded-xl shadow-md p-6 border-l-4 border-primary-500">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-primary-600">Total Tugas</p>
+                            <p id="total-tasks" class="text-3xl font-bold text-primary-800 mt-2">0</p>
+                        </div>
+                        <div class="p-3 rounded-full bg-primary-100 text-primary-600">
+                            <i class="fas fa-tasks text-xl"></i>
+                        </div>
+                    </div>
+                    <p class="text-xs text-primary-500 mt-3"><span id="total-change" class="font-medium">0%</span> dari minggu lalu</p>
+                </div>
+
+                <!-- Completed Tasks -->
+                <div class="stat-card bg-white rounded-xl shadow-md p-6 border-l-4 border-green-500">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-primary-600">Tugas Selesai</p>
+                            <p id="completed-tasks" class="text-3xl font-bold text-primary-800 mt-2">0</p>
+                        </div>
+                        <div class="p-3 rounded-full bg-green-100 text-green-600">
+                            <i class="fas fa-check-circle text-xl"></i>
+                        </div>
+                    </div>
+                    <p class="text-xs text-primary-500 mt-3"><span id="completed-change" class="font-medium">0%</span> dari minggu lalu</p>
+                </div>
+
+                <!-- Pending Tasks -->
+                <div class="stat-card bg-white rounded-xl shadow-md p-6 border-l-4 border-yellow-500">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-primary-600">Tugas Tertunda</p>
+                            <p id="pending-tasks" class="text-3xl font-bold text-primary-800 mt-2">0</p>
+                        </div>
+                        <div class="p-3 rounded-full bg-yellow-100 text-yellow-600">
+                            <i class="fas fa-clock text-xl"></i>
+                        </div>
+                    </div>
+                    <p class="text-xs text-primary-500 mt-3"><span id="pending-change" class="font-medium">0%</span> dari minggu lalu</p>
+                </div>
+
+                <!-- Overdue Tasks -->
+                <div class="stat-card bg-white rounded-xl shadow-md p-6 border-l-4 border-red-500">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-primary-600">Tugas Terlambat</p>
+                            <p id="overdue-tasks" class="text-3xl font-bold text-primary-800 mt-2">0</p>
+                        </div>
+                        <div class="p-3 rounded-full bg-red-100 text-red-600">
+                            <i class="fas fa-exclamation-triangle text-xl"></i>
+                        </div>
+                    </div>
+                    <p class="text-xs text-primary-500 mt-3"><span id="overdue-change" class="font-medium">0%</span> dari minggu lalu</p>
+                </div>
+            </div>
+
+            <!-- Charts Row -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <!-- Completion Rate Chart -->
+                <div class="bg-white rounded-xl shadow-md p-6">
+                    <h2 class="text-lg font-semibold text-primary-800 mb-4">Tingkat Penyelesaian</h2>
+                    <div class="h-64">
+                        <canvas id="completionChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Task Distribution by Tag -->
+                <div class="bg-white rounded-xl shadow-md p-6">
+                    <h2 class="text-lg font-semibold text-primary-800 mb-4">Distribusi Tugas per Kategori</h2>
+                    <div class="h-64">
+                        <canvas id="tagDistributionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Tasks and Productivity -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Recent Tasks -->
+                <div class="bg-white rounded-xl shadow-md p-6 lg:col-span-2">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-lg font-semibold text-primary-800">Tugas Terakhir</h2>
+                        <a href="app.html" class="text-sm text-primary-600 hover:text-primary-800">Lihat Semua</a>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-primary-200">
+                            <thead>
+                                <tr>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-primary-500 uppercase tracking-wider">Tugas</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-primary-500 uppercase tracking-wider">Status</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-primary-500 uppercase tracking-wider">Deadline</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-primary-500 uppercase tracking-wider">Kategori</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recent-tasks" class="bg-white divide-y divide-primary-200">
+                                <!-- Recent tasks will be inserted here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Productivity Tips -->
+                <div class="bg-white rounded-xl shadow-md p-6">
+                    <h2 class="text-lg font-semibold text-primary-800 mb-4">Tips Produktivitas</h2>
+                    <div class="space-y-4">
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0 mt-1">
+                                <div class="h-8 w-8 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center">
+                                    <i class="fas fa-lightbulb"></i>
+                                </div>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm font-medium text-primary-800">Prioritaskan dengan Matriks Eisenhower</p>
+                                <p class="text-sm text-primary-600">Bagi tugas menjadi penting/mendesak untuk manajemen waktu yang lebih baik.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0 mt-1">
+                                <div class="h-8 w-8 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm font-medium text-primary-800">Teknik Pomodoro</p>
+                                <p class="text-sm text-primary-600">Bekerja 25 menit, istirahat 5 menit untuk meningkatkan fokus.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0 mt-1">
+                                <div class="h-8 w-8 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center">
+                                    <i class="fas fa-calendar-check"></i>
+                                </div>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm font-medium text-primary-800">Atur Deadline yang Realistis</p>
+                                <p class="text-sm text-primary-600">Berikan buffer time untuk tugas-tugas penting.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0 mt-1">
+                                <div class="h-8 w-8 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center">
+                                    <i class="fas fa-tags"></i>
+                                </div>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm font-medium text-primary-800">Gunakan Kategori dengan Bijak</p>
+                                <p class="text-sm text-primary-600">Kategorikan tugas untuk memudahkan pelacakan.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample data - in a real app, this would come from your database/API
+        const todos = JSON.parse(localStorage.getItem('todos')) || [];
+        const tags = JSON.parse(localStorage.getItem('tags')) || [
+            { name: 'Kerja', color: 'blue-500' },
+            { name: 'Pribadi', color: 'green-500' },
+            { name: 'Belanja', color: 'yellow-500' },
+            { name: 'Kesehatan', color: 'red-500' }
+        ];
+
+        // Format tanggal
+        function formatDate(date) {
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                timeZone: 'Asia/Jakarta'
+            };
+            return date.toLocaleDateString('id-ID', options);
+        }
+
+        function formatDateShort(dateString) {
+            if (!dateString) return '-';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('id-ID', {
+                day: 'numeric',
+                month: 'short',
+                timeZone: 'Asia/Jakarta'
+            });
+        }
+
+        function isDeadlineOverdue(deadline) {
+            if (!deadline) return false;
+            const today = new Date();
+            const deadlineDate = new Date(deadline);
+            return deadlineDate < today;
+        }
+
+        function getStatusBadge(task) {
+            if (task.done) {
+                return '<span class="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">Selesai</span>';
+            } else if (isDeadlineOverdue(task.deadline)) {
+                return '<span class="px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800">Terlambat</span>';
+            } else {
+                return '<span class="px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800">Dalam Proses</span>';
+            }
+        }
+
+        function getTagBadge(tagName) {
+            const tag = tags.find(t => t.name === tagName);
+            if (!tag) return '';
+            return `<span class="px-2 py-1 text-xs font-medium rounded-full bg-${tag.color}-100 text-${tag.color}-800">${tagName}</span>`;
+        }
+
+        function calculateStats() {
+            const now = new Date();
+            const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+            // Current stats
+            const totalTasks = todos.length;
+            const completedTasks = todos.filter(todo => todo.done).length;
+            const pendingTasks = todos.filter(todo => !todo.done && (!todo.deadline || !isDeadlineOverdue(todo.deadline))).length;
+            const overdueTasks = todos.filter(todo => !todo.done && isDeadlineOverdue(todo.deadline)).length;
+
+            // Previous week stats (sample data - in real app you'd track this over time)
+            const previousWeekTotal = Math.max(0, totalTasks - Math.floor(Math.random() * 5));
+            const previousWeekCompleted = Math.max(0, completedTasks - Math.floor(Math.random() * 3));
+            const previousWeekPending = Math.max(0, pendingTasks - Math.floor(Math.random() * 2));
+            const previousWeekOverdue = Math.max(0, overdueTasks - Math.floor(Math.random() * 2));
+
+            // Calculate changes
+            const totalChange = previousWeekTotal > 0 ? Math.round(((totalTasks - previousWeekTotal) / previousWeekTotal) * 100) : 100;
+            const completedChange = previousWeekCompleted > 0 ? Math.round(((completedTasks - previousWeekCompleted) / previousWeekCompleted) * 100) : (completedTasks > 0 ? 100 : 0);
+            const pendingChange = previousWeekPending > 0 ? Math.round(((pendingTasks - previousWeekPending) / previousWeekPending) * 100) : (pendingTasks > 0 ? 100 : 0);
+            const overdueChange = previousWeekOverdue > 0 ? Math.round(((overdueTasks - previousWeekOverdue) / previousWeekOverdue) * 100) : (overdueTasks > 0 ? 100 : 0);
+
+            return {
+                totalTasks,
+                completedTasks,
+                pendingTasks,
+                overdueTasks,
+                totalChange,
+                completedChange,
+                pendingChange,
+                overdueChange
+            };
+        }
+
+        function renderRecentTasks() {
+            const recentTasksContainer = document.getElementById('recent-tasks');
+            recentTasksContainer.innerHTML = '';
+
+            // Get 5 most recent tasks
+            const recentTasks = [...todos]
+                .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+                .slice(0, 5);
+
+            if (recentTasks.length === 0) {
+                recentTasksContainer.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="px-4 py-4 text-center text-sm text-primary-500">Tidak ada tugas terbaru</td>
+                    </tr>
+                `;
+                return;
+            }
+
+            recentTasks.forEach(task => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-primary-800 max-w-xs truncate">${task.text}</td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm text-primary-500">${getStatusBadge(task)}</td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm text-primary-500">${task.deadline ? formatDateShort(task.deadline) : '-'}</td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm text-primary-500">${task.tag ? getTagBadge(task.tag) : '-'}</td>
+                `;
+                recentTasksContainer.appendChild(row);
+            });
+        }
+
+        function initCharts() {
+            const stats = calculateStats();
+            
+            // Completion rate chart
+            const completionCtx = document.getElementById('completionChart').getContext('2d');
+            new Chart(completionCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Selesai', 'Dalam Proses', 'Terlambat'],
+                    datasets: [{
+                        data: [stats.completedTasks, stats.pendingTasks, stats.overdueTasks],
+                        backgroundColor: [
+                            '#10B981', // green
+                            '#FBBF24', // yellow
+                            '#EF4444'  // red
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                        }
+                    }
+                }
+            });
+
+            // Tag distribution chart
+            const tagDistribution = {};
+            tags.forEach(tag => {
+                tagDistribution[tag.name] = todos.filter(todo => todo.tag === tag.name).length;
+            });
+            tagDistribution['Tanpa Kategori'] = todos.filter(todo => !todo.tag).length;
+
+            const tagCtx = document.getElementById('tagDistributionChart').getContext('2d');
+            new Chart(tagCtx, {
+                type: 'bar',
+                data: {
+                    labels: [...tags.map(t => t.name), 'Tanpa Kategori'],
+                    datasets: [{
+                        label: 'Jumlah Tugas',
+                        data: [...tags.map(t => tagDistribution[t.name]), tagDistribution['Tanpa Kategori']],
+                        backgroundColor: [
+                            '#3B82F6', // blue
+                            '#10B981', // green
+                            '#FBBF24', // yellow
+                            '#EF4444', // red
+                            '#E5E7EB'  // gray
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateDashboard() {
+            const stats = calculateStats();
+            
+            // Update stat cards
+            document.getElementById('total-tasks').textContent = stats.totalTasks;
+            document.getElementById('completed-tasks').textContent = stats.completedTasks;
+            document.getElementById('pending-tasks').textContent = stats.pendingTasks;
+            document.getElementById('overdue-tasks').textContent = stats.overdueTasks;
+            
+            // Update sidebar quick stats
+            document.getElementById('sidebar-total-tasks').textContent = stats.totalTasks;
+            document.getElementById('sidebar-completed-tasks').textContent = stats.completedTasks;
+            document.getElementById('sidebar-overdue-tasks').textContent = stats.overdueTasks;
+            
+            // Update changes
+            document.getElementById('total-change').textContent = `${stats.totalChange >= 0 ? '+' : ''}${stats.totalChange}%`;
+            document.getElementById('completed-change').textContent = `${stats.completedChange >= 0 ? '+' : ''}${stats.completedChange}%`;
+            document.getElementById('pending-change').textContent = `${stats.pendingChange >= 0 ? '+' : ''}${stats.pendingChange}%`;
+            document.getElementById('overdue-change').textContent = `${stats.overdueChange >= 0 ? '+' : ''}${stats.overdueChange}%`;
+            
+            // Update recent tasks
+            renderRecentTasks();
+            
+            // Initialize charts
+            initCharts();
+        }
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', () => {
+            // Set current date
+            document.getElementById('current-date').textContent = formatDate(new Date());
+            
+            // Update dashboard with data
+            updateDashboard();
+            
+            // Listen for storage changes (in case data is updated in another tab)
+            window.addEventListener('storage', () => {
+                const updatedTodos = JSON.parse(localStorage.getItem('todos')) || [];
+                const updatedTags = JSON.parse(localStorage.getItem('tags')) || [];
+                todos = updatedTodos;
+                tags = updatedTags;
+                updateDashboard();
+            });
+        });
+    </script>
+</body>
+</html>
