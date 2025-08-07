@@ -60,18 +60,37 @@
             width: 16rem; /* Same as w-64 */
             overflow-y: auto;
             z-index: 10;
+            transition: transform 0.3s ease;
         }
         .content-with-sidebar {
             margin-left: 16rem; /* Same as sidebar width */
             padding: 1.5rem; /* Same as p-6 */
+            transition: margin 0.3s ease;
         }
         @media (max-width: 768px) {
             .fixed-sidebar-container {
-                position: static;
-                width: 100%;
+                transform: translateX(-100%);
+                width: 80%;
+            }
+            .fixed-sidebar-container.mobile-open {
+                transform: translateX(0);
+                box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
             }
             .content-with-sidebar {
                 margin-left: 0;
+            }
+            .mobile-sidebar-overlay {
+                display: none;
+                position: fixed;
+                top: 4rem;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background-color: rgba(0, 0, 0, 0.5);
+                z-index: 5;
+            }
+            .mobile-sidebar-overlay.open {
+                display: block;
             }
         }
     </style>
@@ -82,7 +101,12 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">
                 <div class="flex items-center">
-                    <a href="index.html" class="flex-shrink-0 flex items-center">
+                    <!-- Mobile menu button -->
+                    <button id="mobile-menu-button" class="md:hidden p-2 rounded-md text-primary-600 hover:text-primary-800 hover:bg-primary-100 focus:outline-none">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                    
+                    <a href="index.html" class="flex-shrink-0 flex items-center ml-2 md:ml-0">
                         <svg class="h-8 w-8 text-primary-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                         </svg>
@@ -100,10 +124,13 @@
         </div>
     </nav>
 
+    <!-- Mobile Sidebar Overlay -->
+    <div id="mobile-sidebar-overlay" class="mobile-sidebar-overlay"></div>
+
     <!-- Main Content with Fixed Sidebar -->
     <div class="flex pt-16"> <!-- Added pt-16 to account for fixed navbar -->
         <!-- Fixed Sidebar -->
-        <div class="fixed-sidebar-container bg-white shadow-lg hidden md:block">
+        <div id="sidebar" class="fixed-sidebar-container bg-white shadow-lg">
             <div class="p-4 border-b border-primary-100">
                 <h2 class="text-lg font-semibold text-primary-800">Menu</h2>
             </div>
@@ -118,7 +145,7 @@
                     </li>
                     <li>
                         <a href="app.html" class="sidebar-item w-full text-left px-3 py-2 rounded-md text-sm font-medium text-primary-800 hover:bg-primary-50">
-                            <i class="fas fa-tasks mr-2 text-primary-600"></i>Aplikasi To-Do
+                            <i class="fas fa-tasks mr-2 text-primary-600"></i>To-Do
                         </a>
                     </li>
                     <li>
@@ -555,6 +582,21 @@
             
             // Update dashboard with data
             updateDashboard();
+            
+            // Mobile sidebar toggle
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('mobile-sidebar-overlay');
+            
+            mobileMenuButton.addEventListener('click', () => {
+                sidebar.classList.toggle('mobile-open');
+                overlay.classList.toggle('open');
+            });
+            
+            overlay.addEventListener('click', () => {
+                sidebar.classList.remove('mobile-open');
+                overlay.classList.remove('open');
+            });
             
             // Listen for storage changes (in case data is updated in another tab)
             window.addEventListener('storage', () => {

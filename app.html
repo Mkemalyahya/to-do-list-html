@@ -42,23 +42,90 @@
             transform: translateY(-2px);
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
-        .fixed-sidebar {
+        /* Sidebar styles */
+        .fixed-sidebar-container {
             position: fixed;
-            height: calc(100vh - 4rem); /* Adjust based on your header height */
+            left: 0;
+            top: 4rem; /* Height of navbar */
+            bottom: 0;
+            width: 16rem;
             overflow-y: auto;
+            z-index: 20;
+            transition: transform 0.3s ease;
+            background-color: white;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
         }
         .content-with-sidebar {
-            margin-left: 16rem; /* Same as sidebar width */
+            margin-left: 16rem;
+            padding: 1.5rem;
+            transition: margin 0.3s ease;
+        }
+        @media (max-width: 768px) {
+            .fixed-sidebar-container {
+                transform: translateX(-100%);
+                width: 80%;
+            }
+            .fixed-sidebar-container.mobile-open {
+                transform: translateX(0);
+            }
+            .content-with-sidebar {
+                margin-left: 0;
+            }
+            .mobile-sidebar-overlay {
+                display: none;
+                position: fixed;
+                top: 4rem;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background-color: rgba(0, 0, 0, 0.5);
+                z-index: 10;
+            }
+            .mobile-sidebar-overlay.open {
+                display: block;
+            }
+        }
+        .tag {
+            display: inline-block;
+            padding: 0.2rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        .urgent {
+            background-color: #fee2e2;
+            color: #b91c1c;
+        }
+        .important {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+        .normal {
+            background-color: #e0f2fe;
+            color: #0369a1;
+        }
+        .low {
+            background-color: #ecfdf5;
+            color: #065f46;
+        }
+        .overdue {
+            color: #b91c1c;
+            font-weight: 600;
         }
     </style>
 </head>
 <body class="min-h-screen bg-gradient-to-b from-primary-50 to-white font-sans">
     <!-- Navigation -->
-    <nav class="bg-white shadow-sm">
+    <nav class="bg-white shadow-sm fixed w-full z-30">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">
                 <div class="flex items-center">
-                    <a href="index.html" class="flex-shrink-0 flex items-center">
+                    <!-- Mobile menu button -->
+                    <button id="mobile-menu-button" class="md:hidden p-2 rounded-md text-primary-600 hover:text-primary-800 hover:bg-primary-100 focus:outline-none">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                    
+                    <a href="index.html" class="flex-shrink-0 flex items-center ml-2 md:ml-0">
                         <svg class="h-8 w-8 text-primary-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                         </svg>
@@ -72,21 +139,23 @@
                         <a href="index.html#features" class="px-3 py-2 text-sm font-medium text-primary-700 hover:text-primary-900">Fitur</a>
                     </div>
                 </div>
-               
             </div>
         </div>
     </nav>
 
+    <!-- Mobile Sidebar Overlay -->
+    <div id="mobile-sidebar-overlay" class="mobile-sidebar-overlay"></div>
+
     <!-- Main App Content with Fixed Sidebar -->
-    <div class="flex pt-4">
+    <div class="flex pt-16"> <!-- Added pt-16 to account for fixed navbar -->
         <!-- Fixed Sidebar -->
-        <div class="fixed-sidebar w-64 bg-white shadow-lg hidden md:block">
+        <div id="sidebar" class="fixed-sidebar-container">
             <!-- Main Menu -->
             <div class="p-4 border-b border-primary-100">
-                      <div class="p-4 border-b border-primary-100">
                 <h2 class="text-lg font-semibold text-primary-800">Menu</h2>
             </div>
             
+            <div class="p-4 border-b border-primary-100">
                 <ul class="space-y-1">
                     <li>
                         <a href="dashboard.html" class="sidebar-item w-full text-left px-3 py-2 rounded-md text-sm font-medium text-primary-800 hover:bg-primary-50">
@@ -95,7 +164,7 @@
                     </li>
                     <li>
                         <a href="app.html" class="sidebar-item active w-full text-left px-3 py-2 rounded-md text-sm font-medium text-primary-800 hover:bg-primary-50">
-                            <i class="fas fa-tasks mr-2 text-primary-600"></i>Aplikasi To-Do
+                            <i class="fas fa-tasks mr-2 text-primary-600"></i>To-Do
                         </a>
                     </li>
                     <li>
@@ -113,7 +182,23 @@
                             <i class="fas fa-check-circle mr-2 text-primary-600"></i>Selesai
                         </a>
                     </li>
+                    <li>
+                        <a href="app.html#filter=overdue" class="sidebar-item w-full text-left px-3 py-2 rounded-md text-sm font-medium text-primary-800 hover:bg-primary-50">
+                            <i class="fas fa-exclamation-circle mr-2 text-primary-600"></i>Terlambat
+                        </a>
+                    </li>
                 </ul>
+            </div>
+            
+            <!-- Tags Filter -->
+            <div class="p-4 border-b border-primary-100">
+                <h3 class="text-sm font-medium text-primary-700 uppercase tracking-wider mb-2">Filter Tag</h3>
+                <div class="space-y-1">
+                    <a href="app.html#tag=urgent" class="block px-2 py-1 text-xs font-medium text-red-700 hover:bg-red-50 rounded">Urgent</a>
+                    <a href="app.html#tag=important" class="block px-2 py-1 text-xs font-medium text-yellow-700 hover:bg-yellow-50 rounded">Important</a>
+                    <a href="app.html#tag=normal" class="block px-2 py-1 text-xs font-medium text-primary-700 hover:bg-primary-50 rounded">Normal</a>
+                    <a href="app.html#tag=low" class="block px-2 py-1 text-xs font-medium text-green-700 hover:bg-green-50 rounded">Low Priority</a>
+                </div>
             </div>
             
             <!-- Quick Stats -->
@@ -131,6 +216,10 @@
                     <div class="flex justify-between text-sm text-primary-600">
                         <span>Belum Selesai:</span>
                         <span id="sidebar-pending-tasks" class="font-medium text-yellow-600">0</span>
+                    </div>
+                    <div class="flex justify-between text-sm text-primary-600">
+                        <span>Terlambat:</span>
+                        <span id="sidebar-overdue-tasks" class="font-medium text-red-600">0</span>
                     </div>
                 </div>
             </div>
@@ -154,21 +243,47 @@
 
                 <!-- Form -->
                 <form id="todo-form" class="p-6 border-b border-primary-100">
-                    <div class="flex gap-2">
-                        <input 
-                            type="text" 
-                            id="task-input" 
-                            placeholder="Tulis tugas..." 
-                            required
-                            class="flex-1 px-4 py-3 border border-primary-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                            autofocus
-                        >
-                        <button 
-                            type="submit"
-                            class="px-4 py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors duration-200 flex items-center"
-                        >
-                            <i class="fas fa-plus mr-2"></i>Tambah
-                        </button>
+                    <div class="space-y-4">
+                        <div class="flex gap-2">
+                            <input 
+                                type="text" 
+                                id="task-input" 
+                                placeholder="Tulis tugas..." 
+                                required
+                                class="flex-1 px-4 py-3 border border-primary-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                autofocus
+                            >
+                            <button 
+                                type="submit"
+                                class="px-4 py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors duration-200 flex items-center"
+                            >
+                                <i class="fas fa-plus mr-2"></i>Tambah
+                            </button>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="task-deadline" class="block text-sm font-medium text-primary-700 mb-1">Deadline</label>
+                                <input 
+                                    type="datetime-local" 
+                                    id="task-deadline"
+                                    class="w-full px-4 py-2 border border-primary-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                >
+                            </div>
+                            
+                            <div>
+                                <label for="task-tag" class="block text-sm font-medium text-primary-700 mb-1">Prioritas</label>
+                                <select 
+                                    id="task-tag"
+                                    class="w-full px-4 py-2 border border-primary-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                >
+                                    <option value="normal">Normal</option>
+                                    <option value="urgent">Urgent</option>
+                                    <option value="important">Important</option>
+                                    <option value="low">Low Priority</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
                 </form>
 
@@ -193,15 +308,19 @@
         // DOM Elements
         const form = document.getElementById('todo-form');
         const input = document.getElementById('task-input');
+        const deadlineInput = document.getElementById('task-deadline');
+        const tagInput = document.getElementById('task-tag');
         const list = document.getElementById('todo-list');
         const emptyState = document.getElementById('empty-state');
         const currentDateEl = document.getElementById('current-date');
         const sidebarTotalTasks = document.getElementById('sidebar-total-tasks');
         const sidebarCompletedTasks = document.getElementById('sidebar-completed-tasks');
         const sidebarPendingTasks = document.getElementById('sidebar-pending-tasks');
+        const sidebarOverdueTasks = document.getElementById('sidebar-overdue-tasks');
 
         let todos = JSON.parse(localStorage.getItem('todos')) || [];
         let currentFilter = 'all';
+        let currentTagFilter = null;
 
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
@@ -219,13 +338,36 @@
 
             currentDateEl.textContent = formatDate(new Date());
             
-            // Check for filter from URL hash
+            // Set default deadline to tomorrow
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            tomorrow.setHours(12, 0, 0, 0);
+            deadlineInput.valueAsDateTime = tomorrow;
+            
+            // Check for filters from URL hash
             const hash = window.location.hash.substring(1);
             if (hash.startsWith('filter=')) {
                 currentFilter = hash.split('=')[1];
+            } else if (hash.startsWith('tag=')) {
+                currentTagFilter = hash.split('=')[1];
             }
             
             render();
+
+            // Mobile sidebar toggle
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('mobile-sidebar-overlay');
+            
+            mobileMenuButton.addEventListener('click', () => {
+                sidebar.classList.toggle('mobile-open');
+                overlay.classList.toggle('open');
+            });
+            
+            overlay.addEventListener('click', () => {
+                sidebar.classList.remove('mobile-open');
+                overlay.classList.remove('open');
+            });
         });
 
         function saveTodos() {
@@ -244,14 +386,43 @@
             });
         }
 
+        function formatDeadline(dateString) {
+            if (!dateString) return "Tidak ada deadline";
+            
+            const date = new Date(dateString);
+            const now = new Date();
+            
+            // Check if deadline is overdue
+            const isOverdue = date < now;
+            
+            const formattedDate = date.toLocaleString("id-ID", {
+                timeZone: "Asia/Jakarta",
+                hour12: false,
+                hour: '2-digit',
+                minute: '2-digit',
+                day: 'numeric',
+                month: 'short',
+                year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
+            });
+            
+            return isOverdue ? `<span class="overdue">${formattedDate} (Terlambat)</span>` : formattedDate;
+        }
+
+        function isOverdue(deadline) {
+            if (!deadline) return false;
+            return new Date(deadline) < new Date();
+        }
+
         function updateSidebarStats() {
             const total = todos.length;
             const completed = todos.filter(todo => todo.done).length;
             const pending = total - completed;
+            const overdue = todos.filter(todo => !todo.done && isOverdue(todo.deadline)).length;
             
             sidebarTotalTasks.textContent = total;
             sidebarCompletedTasks.textContent = completed;
             sidebarPendingTasks.textContent = pending;
+            sidebarOverdueTasks.textContent = overdue;
         }
 
         function render() {
@@ -268,11 +439,43 @@
                 });
             } else if (currentFilter === 'completed') {
                 filteredTodos = filteredTodos.filter(todo => todo.done);
+            } else if (currentFilter === 'overdue') {
+                filteredTodos = filteredTodos.filter(todo => !todo.done && isOverdue(todo.deadline));
             }
+            
+            // Apply tag filter if set
+            if (currentTagFilter) {
+                filteredTodos = filteredTodos.filter(todo => todo.tag === currentTagFilter);
+            }
+            
+            // Sort by overdue first, then by deadline
+            filteredTodos.sort((a, b) => {
+                const aOverdue = isOverdue(a.deadline) && !a.done;
+                const bOverdue = isOverdue(b.deadline) && !b.done;
+                
+                if (aOverdue && !bOverdue) return -1;
+                if (!aOverdue && bOverdue) return 1;
+                
+                // If both have deadlines, sort by deadline
+                if (a.deadline && b.deadline) {
+                    return new Date(a.deadline) - new Date(b.deadline);
+                }
+                
+                // If only one has deadline, put it first
+                if (a.deadline && !b.deadline) return -1;
+                if (!a.deadline && b.deadline) return 1;
+                
+                // Otherwise, keep original order
+                return 0;
+            });
             
             filteredTodos.forEach((todo, index) => {
                 const li = document.createElement('li');
                 li.className = 'p-4 hover:bg-primary-50 transition-all duration-150 task-card';
+                
+                if (isOverdue(todo.deadline) && !todo.done) {
+                    li.classList.add('bg-red-50');
+                }
                 
                 const container = document.createElement('div');
                 container.className = 'flex items-start gap-3';
@@ -295,13 +498,31 @@
                 text.textContent = todo.text;
                 
                 const meta = document.createElement('div');
-                meta.className = 'flex items-center mt-1 text-xs text-primary-500';
+                meta.className = 'flex flex-wrap items-center mt-1 gap-2 text-xs text-primary-500';
                 
+                // Add tag
+                if (todo.tag) {
+                    const tag = document.createElement('span');
+                    tag.className = `tag ${todo.tag}`;
+                    tag.textContent = todo.tag === 'urgent' ? 'Urgent' : 
+                                     todo.tag === 'important' ? 'Important' : 
+                                     todo.tag === 'low' ? 'Low Priority' : 'Normal';
+                    meta.appendChild(tag);
+                }
+                
+                // Add time created
                 const time = document.createElement('span');
-                time.className = 'mr-2';
+                time.className = 'flex items-center';
                 time.innerHTML = `<i class="far fa-clock mr-1"></i>${todo.time}`;
-                
                 meta.appendChild(time);
+                
+                // Add deadline if exists
+                if (todo.deadline) {
+                    const deadline = document.createElement('span');
+                    deadline.className = 'flex items-center';
+                    deadline.innerHTML = `<i class="fas fa-calendar-times mr-1"></i>${formatDeadline(todo.deadline)}`;
+                    meta.appendChild(deadline);
+                }
 
                 content.appendChild(text);
                 content.appendChild(meta);
@@ -361,9 +582,13 @@
             const taskText = input.value.trim();
             if (!taskText) return;
 
+            const deadlineValue = deadlineInput.value ? new Date(deadlineInput.value).toISOString() : null;
+            
             const newTask = {
                 text: taskText,
                 done: false,
+                tag: tagInput.value,
+                deadline: deadlineValue,
                 time: formatTime(new Date()),
                 createdAt: new Date().toISOString()
             };
@@ -373,6 +598,12 @@
             render();
             input.value = '';
             input.focus();
+            
+            // Reset deadline to tomorrow
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            tomorrow.setHours(12, 0, 0, 0);
+            deadlineInput.valueAsDateTime = tomorrow;
         };
 
         // Realtime update antar tab
